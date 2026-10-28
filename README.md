@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/russellmorton/duck-duck-duck/actions/workflows/test.yml/badge.svg)](https://github.com/russellmorton/duck-duck-duck/actions/workflows/test.yml)
 
-**Play it: https://duck-duck-duck-kappa.vercel.app**
+**Play it: https://duck-duck-duck-go.vercel.app**
 
 A river game for toddlers. A little yellow duck swims down a river. Steer it side to side to miss the rocks, logs and sleepy hippos, and to hit the wooden ramps. Every ramp sends the duck flying up in a spin, with a "Wheee!", before it splashes back down.
 
