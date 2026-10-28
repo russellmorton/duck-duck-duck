@@ -1,5 +1,7 @@
 # Duck Duck Duck
 
+[![Tests](https://github.com/russellmorton/duck-duck-duck/actions/workflows/test.yml/badge.svg)](https://github.com/russellmorton/duck-duck-duck/actions/workflows/test.yml)
+
 A river game for toddlers. A little yellow duck swims down a river. Steer it side to side to miss the rocks, logs and sleepy hippos, and to hit the wooden ramps. Every ramp sends the duck flying up in a spin, with a "Wheee!", before it splashes back down.
 
 **Score = metres swum + 20 for every jump.**
@@ -48,6 +50,6 @@ npm test           # both
 
 ## Deploying
 
-Vercel serves the repo root as a static site (`vercel.json`), and `.vercelignore` keeps tests and tooling out. GitHub Actions runs the tests on every push and pull request. `src/analytics.js` loads Vercel Web Analytics on the deployed site only.
+Pushes to `main` deploy to production through Vercel's GitHub integration; pull requests get preview deployments. Vercel serves the repo root as a static site (`vercel.json`), and `.vercelignore` keeps tests and tooling out. GitHub Actions runs the tests on every push and pull request. `src/analytics.js` loads Vercel Web Analytics on the deployed site only.
 
 All the sounds, including the quack, are synthesised in the browser, and the tunes at the end of a swim are original.
