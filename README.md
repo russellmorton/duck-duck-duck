@@ -13,7 +13,7 @@ The duck has three hearts. Bumping into something costs a heart: the duck goes d
 Made for little hands:
 
 - The first thing down the river is a ramp, right where the duck starts, so the first jump comes without any steering.
-- Every row of things leaves at least two lanes open, and the first rows only have one thing to miss. The river speeds up slowly over the first two and a half minutes, then holds steady.
+- Every row of things leaves at least two lanes open, and the first rows only have one thing to miss. The duck speeds up all through a swim: about twice as fast after the first minute, then a little faster still over the next four minutes, after which it holds steady.
 - Bump circles are a little smaller than the drawings, and a duck that lands on something after a jump doesn't get bumped.
 - Arrows either side of the duck show it goes side to side until it's been steered. If nobody has steered after a few seconds, the game says how.
 - Everything spoken also shows in a caption at the bottom. Every 100 metres gets a ding and a cheer.

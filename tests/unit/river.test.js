@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  LANES, LIVES, JUMP_POINTS, DUCK_MIN, DUCK_MAX, DUCK_R, river, pace, row, covers, bumps, onRamp, score, cleanBest, seeded,
+  LANES, LIVES, JUMP_POINTS, DUCK_MIN, DUCK_MAX, DUCK_R, FULL_SPEED, river, pace, row, covers, bumps, onRamp, score, cleanBest, seeded,
 } from "../../src/river.js";
 
 const SCREENS = [[1280, 720], [412, 839], [915, 412], [768, 1024], [1920, 1080], [320, 568]];
@@ -23,16 +23,22 @@ test("on any screen the river fits, with room for the duck and a good look ahead
   }
 });
 
-test("the river speeds up gently, then holds steady", () => {
+test("the duck keeps speeding up until full speed, then holds steady", () => {
   let prev = pace(0);
   assert.equal(prev.p, 0);
-  for (let t = 5; t <= 300; t += 5) {
+  for (let t = 5; t <= FULL_SPEED; t += 5) {
     const P = pace(t);
-    assert.ok(P.reach <= prev.reach && P.mps >= prev.mps && P.every <= prev.every);
-    assert.ok(P.reach >= 2 && P.every >= 1, "never too fast for little hands");
+    assert.ok(P.reach < prev.reach && P.mps > prev.mps && P.every <= prev.every, `faster at ${t}s`);
+    assert.ok(P.reach >= 1.8 && P.every >= 1, "never too fast for little hands");
     prev = P;
   }
-  assert.deepEqual(pace(150), pace(1000));
+  assert.deepEqual(pace(FULL_SPEED), pace(1000));
+});
+
+test("even a short swim gets noticeably faster", () => {
+  assert.ok(pace(20).mps >= pace(0).mps * 1.4, "40% faster after 20 seconds");
+  assert.ok(pace(20).reach <= pace(0).reach * .9);
+  assert.ok(pace(60).mps >= pace(0).mps * 2, "twice as fast after a minute");
 });
 
 test("the first thing down the river is a ramp in front of the duck", () => {
