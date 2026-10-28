@@ -1,0 +1,15 @@
+{
+  "name": "duck-duck-duck",
+  "private": true,
+  "description": "A duck goes down a river: a steering game for toddlers.",
+  "type": "module",
+  "scripts": {
+    "start": "node tests/server.js",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
