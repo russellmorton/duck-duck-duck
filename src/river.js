@@ -20,12 +20,15 @@ export function river(W, H) {
   return { W, H, rw, u, left, right: left + rw, duckY, ahead: duckY / u, behind: (H - duckY) / u };
 }
 
-// The river speeds up over the first two and a half minutes, then holds steady.
+// The duck speeds up all through a swim: quickly over the first minute, so even a short swim gets
+// faster, then a little more over the next four minutes, then it holds steady.
+// p: how far through the first minute (it also makes rows busier)
 // reach: seconds for something to float from the top of the screen down to the duck
 // mps: metres swum a second; every: seconds between rows of things
+export const FULL_SPEED = 300;
 export function pace(t) {
-  const p = Math.min(1, t / 150);
-  return { p, reach: 3.6 - 1.5 * p, mps: 3 + 4 * p, every: 1.7 - .6 * p };
+  const p = Math.min(1, t / 60), q = Math.min(1, Math.max(0, t - 60) / (FULL_SPEED - 60));
+  return { p, reach: 3.6 - 1.4 * p - .4 * q, mps: 3 + 4 * p + 3 * q, every: 1.7 - .6 * p };
 }
 
 // One row across the river. At least two lanes are always left open, so there's a wide way through,
