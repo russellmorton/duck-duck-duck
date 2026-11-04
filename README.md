@@ -23,7 +23,7 @@ Made for little hands:
 
 From 1 December to 6 January the river goes Christmassy. The banks are snowy, with Christmas trees, presents, snowmen and candy canes. The rocks and logs have snow on them, and the ramps have candy-striped tops. The duck and the hippos wear Santa hats, and snow falls (but not when the device asks for reduced motion). Sleigh bells jingle when a swim starts, at every 100 metres and on the score card, and the duck says "Ho ho ho!". The game plays the same either way.
 
-Add `?christmas=1` to the address to see it on any day, or `?christmas=0` to turn it off.
+Grown-ups can turn it on or off on any day with the **Christmas** switch on the title screen, which is remembered. `?christmas=1` or `?christmas=0` in the address overrides both.
 
 ## Controls
 

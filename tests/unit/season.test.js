@@ -16,3 +16,11 @@ test("?christmas=1 turns it on any day, and ?christmas=0 turns it off", () => {
   assert.equal(christmas(day(7, 4), "?seed=3"), false);
   assert.equal(christmas(day(12, 25), "?christmas=maybe"), true);
 });
+
+test("the grown-ups' switch beats the date, and the address beats the switch", () => {
+  assert.equal(christmas(day(7, 4), "", true), true);
+  assert.equal(christmas(day(12, 25), "", false), false);
+  assert.equal(christmas(day(12, 25), "", null), true);
+  assert.equal(christmas(day(7, 4), "?christmas=0", true), false);
+  assert.equal(christmas(day(12, 25), "?christmas=1", false), true);
+});

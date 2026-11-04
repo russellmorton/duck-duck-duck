@@ -96,6 +96,17 @@ body[data-state="title"] .stats { visibility: hidden; }
 .title-best svg { width: 24px; height: 24px; }
 .title-tag { margin: 0; background: #e8312f; color: #fff; border: 4px solid var(--ink); border-radius: 999px; padding: 0 20px; font-weight: 800; font-size: clamp(1.3rem, 4vw, 1.9rem); box-shadow: 0 4px 0 rgba(29,43,79,.3); transform: rotate(-3deg); }
 
+.merry-switch {
+  display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 16px 4px 8px;
+  border: 3px solid var(--ink); border-radius: 999px; background: rgba(255,255,255,.9); font-weight: 800; font-size: 1.1rem;
+  box-shadow: 0 3px 0 rgba(29,43,79,.18);
+}
+.merry-switch svg { width: 30px; height: 30px; }
+.merry-switch .knob { width: 40px; height: 22px; border-radius: 999px; background: #c5cedb; border: 2px solid var(--ink); position: relative; box-sizing: border-box; transition: background .2s; }
+.merry-switch .knob::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); box-sizing: border-box; transition: transform .2s; }
+.merry-switch[aria-pressed="true"] .knob { background: #3fae4f; }
+.merry-switch[aria-pressed="true"] .knob::after { transform: translateX(18px); }
+
 /* Christmas (see src/season.js): snow instead of grass */
 body[data-theme="christmas"] { background: #eef6fb; }
 body[data-theme="christmas"] .title { background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.7), rgba(255,255,255,0) 65%); }
@@ -178,6 +189,10 @@ body[data-theme="christmas"] .card { border-color: #e8312f; box-shadow: 0 8px 0 
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#ffd23f" stroke="#1d2b4f" stroke-width="2" stroke-linejoin="round"/></svg>
     Best <span id="title-best-n"></span>
   </p>
+  <button class="merry-switch" id="merry" type="button" aria-pressed="false">
+    <svg viewBox="0 0 32 32" aria-hidden="true" stroke="#1d2b4f" stroke-width="2" stroke-linejoin="round"><path d="M14 25h4v5h-4z" fill="#7a4f26"/><path d="M16 4l-8 10h4l-6 8h5l-5 6h20l-5-6h5l-6-8h4z" fill="#3fae4f"/><circle cx="13" cy="17" r="1.6" fill="#ff3b3b" stroke="none"/><circle cx="19" cy="21" r="1.6" fill="#ffd23f" stroke="none"/><circle cx="17" cy="12" r="1.6" fill="#4fc3ff" stroke="none"/><path d="M16 1.5l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z" fill="#ffd23f" stroke-width="1"/></svg>
+    Christmas <span class="knob" aria-hidden="true"></span>
+  </button>
 </div>
 
 <div class="results" id="results" role="dialog" aria-modal="true" aria-labelledby="results-title" hidden>

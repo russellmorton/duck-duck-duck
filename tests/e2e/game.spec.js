@@ -148,3 +148,25 @@ test("the Christmas theme: snow, a Santa hat and ho ho ho", async ({ page }) => 
   await page.goto("/?christmas=1");
   await expect(page.locator("#title-tag")).toHaveText("Merry Christmas!");
 });
+
+test("the Christmas switch on the title screen turns it on and off, and is remembered", async ({ page }) => {
+  await page.clock.setFixedTime(new Date(2026, 6, 4, 10, 0));   // July
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "Christmas" });
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#title-tag")).toBeHidden();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#title-tag")).toBeVisible();
+  await expect.poll(() => state(page)).toBe("title");   // the switch isn't a tap to start
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Christmas" })).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#title-screen").click();
+  await expect(page.locator("#caption")).toHaveText("Duck, duck, duck! Ho ho ho!");
+
+  await page.reload();
+  await page.getByRole("button", { name: "Christmas" }).click();
+  await expect(page.locator("#title-tag")).toBeHidden();
+  expect(await page.evaluate(() => document.body.dataset.theme)).toBeUndefined();
+});

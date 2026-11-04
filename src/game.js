@@ -20,24 +20,29 @@ let saved = {};
 try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch {}
 let best = cleanBest(saved.best);
 let muted = saved.muted === true;
-function save() { try { localStorage.setItem(KEY, JSON.stringify({ best, muted })); } catch {} }
+let merryChoice = typeof saved.christmas === "boolean" ? saved.christmas : null;   // the Christmas switch, once used
+function save() { try { localStorage.setItem(KEY, JSON.stringify({ best, muted, christmas: merryChoice ?? undefined })); } catch {} }
 
 // What floats down the river comes from a seeded random when the address has ?seed=, so a run can be
 // replayed (the browser tests use this). Splashes and sparkles stay random either way.
 const seed = Number(new URLSearchParams(location.search).get("seed"));
 const rnd = Number.isInteger(seed) && seed > 0 ? seeded(seed) : Math.random;
 
-// December to Twelfth Night, or ?christmas=1, the river goes Christmassy (see season.js).
-const xmas = christmas(new Date(), location.search);
-setChristmas(xmas);
-if (xmas) {
-  document.body.dataset.theme = "christmas";
-  document.querySelector('meta[name="theme-color"]').content = "#eef6fb";
-  document.querySelector('link[rel="icon"]').href = "favicon-christmas.svg";
-  $("title-tag").hidden = false;
-  $("results-title").textContent = "Ho ho ho!";
-  $("river").setAttribute("aria-label", "A little duck in a Santa hat swimming down a snowy river");
+// December to Twelfth Night, or with the Christmas switch or ?christmas=1, the river goes
+// Christmassy (see season.js).
+let xmas;
+function setXmas(on) {
+  xmas = on;
+  setChristmas(on);
+  if (on) document.body.dataset.theme = "christmas"; else delete document.body.dataset.theme;
+  document.querySelector('meta[name="theme-color"]').content = on ? "#eef6fb" : "#74c14d";
+  document.querySelector('link[rel="icon"]').href = on ? "favicon-christmas.svg" : "favicon.svg";
+  $("title-tag").hidden = !on;
+  $("results-title").textContent = on ? "Ho ho ho!" : "Hooray!";
+  $("river").setAttribute("aria-label", on ? "A little duck in a Santa hat swimming down a snowy river" : "A little duck swimming down a river");
+  $("merry").setAttribute("aria-pressed", String(on));
 }
+setXmas(christmas(new Date(), location.search, merryChoice));
 
 // ---------- state ----------
 // title → swim → over (no hearts left; the river slows to a stop) → done (the score card) → swim again
@@ -469,10 +474,22 @@ requestAnimationFrame(frame);
 setState("title");
 
 // ---------- title and buttons ----------
-const titleCols = xmas ? ["#e8312f", "#ffd93b", "#3fae4f", "#ffffff"] : ["#ffd93b", "#ff9a2e", "#4fc3ff", "#ff6b9d"];
-$("title").innerHTML = ["Duck", "Duck", "Duck"].map((word, j) => `<span class="word">${
-  [...word].map((ch, i) => `<span aria-hidden="true" style="color:${titleCols[(i + j) % titleCols.length]};--i:${i + j * 4}">${ch}</span>`).join("")
-}</span>`).join(" ");
+function renderTitle() {
+  const titleCols = xmas ? ["#e8312f", "#ffd93b", "#3fae4f", "#ffffff"] : ["#ffd93b", "#ff9a2e", "#4fc3ff", "#ff6b9d"];
+  $("title").innerHTML = ["Duck", "Duck", "Duck"].map((word, j) => `<span class="word">${
+    [...word].map((ch, i) => `<span aria-hidden="true" style="color:${titleCols[(i + j) % titleCols.length]};--i:${i + j * 4}">${ch}</span>`).join("")
+  }</span>`).join(" ");
+}
+renderTitle();
+
+// The grown-ups' Christmas switch, on the title screen only, so it never changes mid-swim.
+$("merry").addEventListener("click", e => {
+  e.stopPropagation();   // not a tap to start
+  merryChoice = !xmas;
+  setXmas(merryChoice);
+  save();
+  renderTitle();
+});
 if (best) { $("title-best").hidden = false; $("title-best-n").textContent = best; }
 
 let lock;
