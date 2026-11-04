@@ -12,16 +12,17 @@ const state = page => page.evaluate(() => document.body.dataset.state);
 const duckX = page => page.locator("#river").evaluate(el => Number(el.dataset.duck));
 const num = async loc => Number((await loc.textContent()).match(/\d+/)[0]);
 
+// christmas=0 keeps the plain river even in December, so these tests pass all year round.
 // The seed makes the same things float down the river every time.
-async function play(page, seed = 1) {
-  await page.goto(`/?seed=${seed}`);
+async function play(page, seed = 1, theme = "christmas=0") {
+  await page.goto(`/?seed=${seed}&${theme}`);
   await page.locator("#title-screen").click();
   await expect(page.locator("#title-screen")).toBeHidden();
   await expect.poll(() => state(page)).toBe("swim");
 }
 
 test("the title shows until you tap, then the duck sets off", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?christmas=0");
   await expect(page.locator("#title")).toHaveAttribute("aria-label", "Duck Duck Duck");
   await expect.poll(() => state(page)).toBe("title");
   await expect(page.locator("#title-best")).toBeHidden();
@@ -104,7 +105,7 @@ test("three bumps end the swim, the score adds up, and you can go again", async 
 });
 
 test("sound can be turned off, and stays off", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?christmas=0");
   const mute = page.locator("#mute");
   await expect(mute).toHaveAttribute("aria-pressed", "false");
   await mute.click();
@@ -115,7 +116,7 @@ test("sound can be turned off, and stays off", async ({ page }) => {
 });
 
 test("Enter starts the game from the title", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?christmas=0");
   await page.keyboard.press("Enter");
   await expect.poll(() => state(page)).toBe("swim");
 });
@@ -128,4 +129,22 @@ test("nothing spills off the side of the screen", async ({ page }) => {
   expect(right.x + right.width).toBeLessThanOrEqual(hud.width);
   const stats = await page.locator(".pills").boundingBox();
   expect(stats.x + stats.width).toBeLessThan(right.x);
+});
+
+test("the Christmas theme: snow, a Santa hat and ho ho ho", async ({ page }) => {
+  await page.goto("/?christmas=0");
+  await expect(page.locator("#title-tag")).toBeHidden();
+  expect(await page.evaluate(() => document.body.dataset.theme)).toBeUndefined();
+
+  await play(page, 1, "christmas=1");
+  expect(await page.evaluate(() => document.body.dataset.theme)).toBe("christmas");
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", "favicon-christmas.svg");
+  await expect(page.locator("#river")).toHaveAttribute("aria-label", /Santa hat/);
+  await expect(page.locator("#caption")).toHaveText("Duck, duck, duck! Ho ho ho!");
+  await expect(page.locator("#results-title")).toHaveText("Ho ho ho!");
+  // the game itself plays just the same
+  await expect(page.locator("#jumps")).toHaveText("1", { timeout: 8000 });
+
+  await page.goto("/?christmas=1");
+  await expect(page.locator("#title-tag")).toHaveText("Merry Christmas!");
 });

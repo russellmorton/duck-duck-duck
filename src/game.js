@@ -1,7 +1,8 @@
 import {
   LANES, LIVES, AIR, STEER, DUCK_MIN, DUCK_MAX, river, pace, row, bumps, onRamp, score, cleanBest, seeded,
 } from "./river.js";
-import { drawRiver, drawThing, drawDuck, drawStar } from "./draw.js";
+import { drawRiver, drawThing, drawDuck, drawStar, drawSnow, setChristmas } from "./draw.js";
+import { christmas } from "./season.js";
 
 const $ = id => document.getElementById(id);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -25,6 +26,18 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify({ best, muted }
 // replayed (the browser tests use this). Splashes and sparkles stay random either way.
 const seed = Number(new URLSearchParams(location.search).get("seed"));
 const rnd = Number.isInteger(seed) && seed > 0 ? seeded(seed) : Math.random;
+
+// December to Twelfth Night, or ?christmas=1, the river goes Christmassy (see season.js).
+const xmas = christmas(new Date(), location.search);
+setChristmas(xmas);
+if (xmas) {
+  document.body.dataset.theme = "christmas";
+  document.querySelector('meta[name="theme-color"]').content = "#eef6fb";
+  document.querySelector('link[rel="icon"]').href = "favicon-christmas.svg";
+  $("title-tag").hidden = false;
+  $("results-title").textContent = "Ho ho ho!";
+  $("river").setAttribute("aria-label", "A little duck in a Santa hat swimming down a snowy river");
+}
 
 // ---------- state ----------
 // title → swim → over (no hearts left; the river slows to a stop) → done (the score card) → swim again
@@ -98,6 +111,15 @@ const sfx = {
   bonk: () => { tone(200, 0, .18, "square", .07, 80); hiss(.12, 2000, "bandpass", .15); tone(900, .12, .3, "sine", .06, 600); },
   ding: () => { tone(1319, 0, .5, "triangle", .12); tone(1760, .12, .7, "triangle", .1); },
 };
+// Sleigh bells: little bright jingles, a few at a time, shaken over half a second or so.
+function bells(t0 = 0, n = 8) {
+  for (let i = 0; i < n; i++) {
+    const t = t0 + i * .07 + Math.random() * .03;
+    tone(2600 + Math.random() * 900, t, .12, "triangle", .05);
+    tone(3900 + Math.random() * 1200, t + .005, .09, "sine", .03);
+    hiss(.06, 7000, "highpass", .05, t);
+  }
+}
 // An original little tune for the end of a swim, and a bigger one for a best score.
 function jingle() {
   [[523, 0], [659, .14], [784, .28], [659, .42], [784, .56], [1047, .76]].forEach(([f, d], i, n) => tone(f, d, i === n.length - 1 ? .6 : .16, "triangle", .14));
@@ -143,7 +165,7 @@ function splash(x, y, n = 14) {
   parts.push({ k: "ring", x, y, r: L.u * .2, life: .7 });
 }
 function sparkle(x, y, n, spread = 1) {
-  const cols = ["#ffd23f", "#ff6b9d", "#7ddc5a", "#4fc3ff", "#ffffff"];
+  const cols = xmas ? ["#e8312f", "#2f8a3e", "#ffd23f", "#ffffff", "#ff6b9d"] : ["#ffd23f", "#ff6b9d", "#7ddc5a", "#4fc3ff", "#ffffff"];
   for (let i = 0; i < n; i++) {
     const a = Math.random() * TAU, v = (120 + Math.random() * 220) * spread;
     parts.push({ k: "star", x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, r: 5 + Math.random() * 6, rot: Math.random() * TAU, col: cols[i % cols.length], life: 1.2 });
@@ -253,6 +275,7 @@ function bump(o) {
 }
 function milestone(m) {
   sfx.ding();
+  if (xmas) bells(.1, 6);
   sparkle(sx(duck.x), L.duckY - L.u * .6, 14, .7);
   say(`${m} metres!`);
 }
@@ -317,18 +340,21 @@ function results() {
   again.disabled = true;   // a moment's pause, so a tap meant for the duck doesn't skip the card
   setTimeout(() => { again.disabled = false; again.focus({ preventScroll: true }); }, 1000);
   jingle();
+  if (xmas) bells(.7, 10);
   if (isBest) {
     fanfare();
     for (let i = 0; i < 5; i++) setTimeout(() => sparkle(L.W * (.15 + Math.random() * .7), L.H * (.2 + Math.random() * .3), 18), 300 + i * 300);
   }
-  say(`Hooray! You swam ${m} metres and did ${plural(jumps, "jump")}!${isBest ? " That's your best ever!" : ""}`);
+  const cheer = xmas ? "Ho ho ho!" : "Hooray!";
+  say(`${cheer} You swam ${m} metres and did ${plural(jumps, "jump")}!${isBest ? " That's your best ever!" : ""}${xmas ? " Merry Christmas!" : ""}`);
 }
 
 function go() {
   newRun();
   setState("swim");
   sfx.quacks();
-  say("Duck, duck, duck! Off we go!");
+  if (xmas) bells(.6);
+  say(xmas ? "Duck, duck, duck! Ho ho ho!" : "Duck, duck, duck! Off we go!");
 }
 
 // ---------- input ----------
@@ -388,6 +414,7 @@ function draw() {
   });
   if (duck.hurt > 0) dizzy(x, L.duckY - L.u * .3);
   drawParts(false);
+  if (xmas && !reduce) drawSnow(c, L.W, L.H, T);
   if (state === "swim" && !steered) arrows(x);
 }
 
@@ -442,7 +469,7 @@ requestAnimationFrame(frame);
 setState("title");
 
 // ---------- title and buttons ----------
-const titleCols = ["#ffd93b", "#ff9a2e", "#4fc3ff", "#ff6b9d"];
+const titleCols = xmas ? ["#e8312f", "#ffd93b", "#3fae4f", "#ffffff"] : ["#ffd93b", "#ff9a2e", "#4fc3ff", "#ff6b9d"];
 $("title").innerHTML = ["Duck", "Duck", "Duck"].map((word, j) => `<span class="word">${
   [...word].map((ch, i) => `<span aria-hidden="true" style="color:${titleCols[(i + j) % titleCols.length]};--i:${i + j * 4}">${ch}</span>`).join("")
 }</span>`).join(" ");

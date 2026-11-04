@@ -3,6 +3,11 @@
 
 const TAU = Math.PI * 2;
 const INK = "#1d2b4f";
+
+// Christmas: snowy banks, Christmas trees, presents, snowmen and candy canes, snow on the rocks and
+// logs, a Santa hat on the duck and on the hippos, and a candy-striped lip on the ramps.
+let xmas = false;
+export function setChristmas(on) { xmas = on; }
 const line = u => Math.max(2, u * .035);
 
 // A repeatable 0..1 from any number, so the banks look the same each time they scroll past.
@@ -40,7 +45,7 @@ export function drawRiver(c, L, scroll, T) {
   const yOf = w => duckY - (w - scroll) * u;         // and back
   const edge = (w, side) => (side < 0 ? left : right) + (Math.sin(w * 1.9 + side) * .05 + Math.sin(w * .63 + side * 2) * .05) * u;
 
-  c.fillStyle = "#74c14d";
+  c.fillStyle = xmas ? "#eef6fb" : "#74c14d";
   c.fillRect(0, 0, W, H);
 
   const shore = side => { const pts = []; for (let y = -12; y <= H + 24; y += 12) pts.push([edge(at(y), side), y]); return pts; };
@@ -48,11 +53,12 @@ export function drawRiver(c, L, scroll, T) {
   const trace = (pts, join) => pts.forEach(([x, y], i) => i || join ? c.lineTo(x, y) : c.moveTo(x, y));
   c.lineJoin = c.lineCap = "round";
   // sand along the water's edge
-  c.strokeStyle = "#f2d78a"; c.lineWidth = u * .34;
+  c.strokeStyle = xmas ? "#cfe5f2" : "#f2d78a"; c.lineWidth = u * .34;
   for (const pts of [lft, rgt]) { c.beginPath(); trace(pts); c.stroke(); }
   // the water
   const g = c.createLinearGradient(left, 0, right, 0);
-  g.addColorStop(0, "#66c8f6"); g.addColorStop(.5, "#3aa3e6"); g.addColorStop(1, "#66c8f6");
+  if (xmas) { g.addColorStop(0, "#7ccdf2"); g.addColorStop(.5, "#3d97d8"); g.addColorStop(1, "#7ccdf2"); }
+  else { g.addColorStop(0, "#66c8f6"); g.addColorStop(.5, "#3aa3e6"); g.addColorStop(1, "#66c8f6"); }
   c.fillStyle = g;
   c.beginPath(); trace(lft); trace(rgt.slice().reverse(), true); c.closePath(); c.fill();
   c.strokeStyle = "rgba(220,245,255,.9)"; c.lineWidth = Math.max(3, u * .06);
@@ -69,13 +75,21 @@ export function drawRiver(c, L, scroll, T) {
   c.globalAlpha = 1;
 
   // things on the banks, set back from the water so they never cover it
+  // (drawn from the top of the screen down, so things nearer the bottom stand in front)
   const room = left;
-  for (let i = Math.floor(at(H + u * 2) / TILE); i <= Math.ceil(at(-u * 2) / TILE); i++) for (const side of [-1, 1]) {
+  for (let i = Math.ceil(at(-u * 2) / TILE); i >= Math.floor(at(H + u * 2) / TILE); i--) for (const side of [-1, 1]) {
     const h = n => hash(i * 17.3 + side * 5.1 + n * 1.7);
     const y = yOf((i + h(1)) * TILE), what = h(3);
     const place = r => { const back = r + u * .2 + h(2) * Math.max(0, room - 2 * r - u * .4); return side < 0 ? left - back : right + back; };
     const big = u * (.45 + h(4) * .25), small = u * .22;
-    if (what < .35 && room > 2 * big + u * .3) tree(c, place(big), y, big, h(5));
+    if (xmas) {
+      if (what < .35 && room > 2 * big + u * .3) firTree(c, place(big * .8), y, big, h(5));
+      else if (what < .55 && h(5) > .5 && room > 2 * small * 1.4 + u * .4) snowman(c, place(small * 1.4), y, small * 1.4);
+      else if (what < .55 && room > 2 * small + u * .4) bush(c, place(small * 1.3), y, small * 1.3, h(5));
+      else if (what < .8 && room > 2 * small + u * .3) presents(c, place(small), y, small, h(5));
+      else if (room > u * .5) candyCane(c, place(small * .5), y, small * .9, h(5));
+    }
+    else if (what < .35 && room > 2 * big + u * .3) tree(c, place(big), y, big, h(5));
     else if (what < .55 && room > 2 * small + u * .4) bush(c, place(small * 1.3), y, small * 1.3, h(5));
     else if (what < .8 && room > 2 * small + u * .3) flowers(c, place(small), y, small, h(5));
     else if (room > u * .5) tuft(c, place(small * .6), y, small * .6);
@@ -102,7 +116,11 @@ function bush(c, x, y, r, h) {
   c.save(); c.translate(x, y);
   blob(c, r, h * 50, 7);
   c.fillStyle = "#4fa844"; c.fill(); c.strokeStyle = INK; c.lineWidth = Math.max(1.5, r * .1); c.stroke();
-  c.translate(-r * .2, -r * .25); blob(c, r * .45, h * 50 + 3, 6); c.fillStyle = "#6cc35a"; c.fill();
+  c.translate(-r * .2, -r * .25); blob(c, r * .45, h * 50 + 3, 6); c.fillStyle = xmas ? "#fff" : "#6cc35a"; c.fill();
+  if (xmas) {
+    c.fillStyle = "#e8312f";
+    for (let k = 0; k < 3; k++) { c.beginPath(); c.arc(r * (.45 + k * .12), r * (.5 - (k % 2) * .12), r * .12, 0, TAU); c.fill(); }
+  }
   c.restore();
 }
 function flowers(c, x, y, s, h) {
@@ -119,6 +137,81 @@ function tuft(c, x, y, s) {
   c.beginPath();
   for (const dx of [-.5, 0, .5]) { c.moveTo(x + dx * s * .6, y + s * .3); c.lineTo(x + dx * s * 1.2, y - s * .5); }
   c.stroke();
+}
+// A Christmas tree, standing up: three green tiers with snow on the tips, baubles, and a star.
+function firTree(c, x, y, r, h) {
+  c.save(); c.translate(x, y);
+  c.fillStyle = "rgba(60,100,140,.18)"; c.beginPath(); c.ellipse(r * .15, r * .95, r * .75, r * .2, 0, 0, TAU); c.fill();
+  c.lineWidth = Math.max(2, r * .07); c.strokeStyle = INK; c.lineJoin = "round";
+  c.fillStyle = "#8a5a2b"; c.beginPath(); c.rect(-r * .13, r * .55, r * .26, r * .35); c.fill(); c.stroke();
+  const tiers = [[r * .7, r * .8, r * .1], [r * .55, r * .3, -r * .45], [r * .4, -r * .2, -r * .95]];   // half-width, bottom, top
+  for (const [hw, bot, top] of tiers) {
+    c.beginPath(); c.moveTo(-hw, bot); c.lineTo(0, top); c.lineTo(hw, bot); c.closePath();
+    c.fillStyle = "#2f8a3e"; c.fill(); c.stroke();
+    // snow along the bottom edge
+    c.beginPath(); c.moveTo(-hw, bot);
+    for (let k = 0; k <= 4; k++) c.quadraticCurveTo(-hw + (k - .5) * hw / 2, bot + (k % 2 ? r * .1 : -r * .02), -hw + k * hw / 2, bot);
+    c.lineTo(hw * .7, bot - r * .1); c.lineTo(-hw * .7, bot - r * .1); c.closePath();
+    c.fillStyle = "#fff"; c.fill();
+  }
+  const cols = ["#ff5a4e", "#ffd23f", "#4fc3ff", "#ff6b9d"];
+  [[-.3, .55], [.25, .65], [0, .1], [-.2, -.25], [.18, -.05], [.05, -.6]].forEach(([bx, by], k) => {
+    c.beginPath(); c.arc(bx * r, by * r, r * .09, 0, TAU); c.fillStyle = cols[(k + (h * 4 | 0)) % cols.length]; c.fill();
+  });
+  drawStar(c, 0, -r * 1.02, r * .2, -Math.PI / 2, "#ffd23f");
+  c.restore();
+}
+function snowman(c, x, y, s) {
+  c.save(); c.translate(x, y);
+  c.lineWidth = Math.max(1.5, s * .08); c.strokeStyle = INK;
+  c.fillStyle = "rgba(60,100,140,.18)"; c.beginPath(); c.ellipse(s * .1, s * .62, s * .55, s * .14, 0, 0, TAU); c.fill();
+  c.fillStyle = "#fff";
+  c.beginPath(); c.arc(0, s * .25, s * .45, 0, TAU); c.fill(); c.stroke();
+  c.beginPath(); c.arc(0, -s * .4, s * .32, 0, TAU); c.fill(); c.stroke();
+  // scarf, eyes, carrot nose, buttons
+  c.fillStyle = "#e8312f"; c.beginPath(); c.roundRect(-s * .3, -s * .16, s * .6, s * .14, s * .05); c.fill();
+  c.beginPath(); c.roundRect(s * .1, -s * .1, s * .13, s * .3, s * .05); c.fill();
+  c.fillStyle = INK;
+  for (const side of [-1, 1]) { c.beginPath(); c.arc(side * s * .11, -s * .47, s * .045, 0, TAU); c.fill(); }
+  for (const by of [.15, .38]) { c.beginPath(); c.arc(0, s * by, s * .05, 0, TAU); c.fill(); }
+  c.fillStyle = "#ff8a1f"; c.beginPath(); c.moveTo(0, -s * .42); c.lineTo(s * .3, -s * .36); c.lineTo(0, -s * .32); c.closePath(); c.fill();
+  c.restore();
+}
+function presents(c, x, y, s, h) {
+  const cols = [["#e8312f", "#ffd23f"], ["#2f8a3e", "#ff5a6e"], ["#4fc3ff", "#ffffff"], ["#b48cff", "#ffd23f"]];
+  for (let k = 0; k < 2; k++) {
+    const [box, ribbon] = cols[(k + (h * 4 | 0)) % cols.length];
+    const w = s * (k ? .7 : .95), px = x + (k ? s * .45 : -s * .25), py = y + (k ? s * .2 : -s * .1);
+    c.save(); c.translate(px, py); c.rotate((hash(h * 13 + k) - .5) * .4);
+    c.lineWidth = Math.max(1.5, s * .08); c.strokeStyle = INK;
+    c.beginPath(); c.roundRect(-w / 2, -w / 2, w, w, w * .1); c.fillStyle = box; c.fill(); c.stroke();
+    c.fillStyle = ribbon; c.fillRect(-w * .09, -w / 2, w * .18, w); c.fillRect(-w / 2, -w * .09, w, w * .18);
+    for (const side of [-1, 1]) { c.beginPath(); c.ellipse(side * w * .16, -w / 2, w * .16, w * .09, side * .5, 0, TAU); c.fill(); c.stroke(); }
+    c.restore();
+  }
+}
+function candyCane(c, x, y, s, h) {
+  c.save(); c.translate(x, y); if (h > .5) c.scale(-1, 1);
+  c.lineCap = "round";
+  const path = () => { c.beginPath(); c.moveTo(0, s * .6); c.lineTo(0, -s * .3); c.arc(s * .2, -s * .3, s * .2, Math.PI, 0); };
+  path(); c.strokeStyle = INK; c.lineWidth = s * .26; c.stroke();
+  path(); c.strokeStyle = "#fff"; c.lineWidth = s * .17; c.stroke();
+  c.setLineDash([s * .1, s * .12]); path(); c.strokeStyle = "#e8312f"; c.stroke();
+  c.restore();
+}
+// Snow falling over everything. Each flake has its own speed and sway; it doesn't need to be the same each time.
+export function drawSnow(c, W, H, T) {
+  c.save();
+  c.fillStyle = "#fff";
+  const n = Math.round(Math.min(90, W * H / 14000));
+  for (let i = 0; i < n; i++) {
+    const r = 1.5 + hash(i * 3.3) * 2.5, fall = 25 + r * 12;
+    const y = (hash(i * 5.7) * (H + 20) + T * fall) % (H + 20) - 10;
+    const x = hash(i * 9.1) * W + Math.sin(T * (.6 + hash(i) * .6) + i) * 14;
+    c.globalAlpha = .55 + hash(i * 2.1) * .35;
+    c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+  }
+  c.restore();
 }
 function reeds(c, x, y, s, T, h) {
   c.lineCap = "round";
@@ -158,6 +251,7 @@ function rock(c, u, seed, T) {
   foam(c, r, r * .9, T);
   blob(c, r, seed * 1000, 9);
   c.fillStyle = "#98a3b6"; c.fill(); c.strokeStyle = INK; c.lineWidth = line(u); c.stroke();
+  if (xmas) { c.save(); c.translate(-r * .12, -r * .2); blob(c, r * .6, seed * 1000 + 3, 8); c.fillStyle = "#fff"; c.fill(); c.restore(); return; }
   c.save(); c.translate(-r * .22, -r * .25); blob(c, r * .42, seed * 1000 + 3, 7); c.fillStyle = "#c8d0dd"; c.fill(); c.restore();
   c.fillStyle = "#6fae4a"; c.beginPath(); c.ellipse(r * .35, r * .32, r * .22, r * .12, .4, 0, TAU); c.fill();
 }
@@ -176,6 +270,22 @@ function log(c, u, seed, T) {
     c.beginPath(); c.ellipse(side * len / 2, 0, th * .22, th * .5, 0, 0, TAU);
     c.fillStyle = "#f0cf98"; c.fill(); c.strokeStyle = INK; c.lineWidth = line(u); c.stroke();
     c.beginPath(); c.ellipse(side * len / 2, 0, th * .1, th * .26, 0, 0, TAU); c.strokeStyle = "#c9995a"; c.lineWidth = line(u) * .7; c.stroke();
+  }
+  if (xmas) {
+    // snow along the top, and a sprig of holly
+    c.beginPath(); c.moveTo(-len * .44, -th * .5);
+    for (let k = 0; k <= 6; k++) c.quadraticCurveTo(-len * .44 + (k - .5) * len * .88 / 6, -th * (hash(seed * 30 + k) > .5 ? .15 : .25), -len * .44 + k * len * .88 / 6, -th * .5);
+    c.lineTo(len * .44, -th * .62); c.lineTo(-len * .44, -th * .62); c.closePath();
+    c.fillStyle = "#fff"; c.fill();
+    c.save(); c.translate(len * .12, -th * .45);
+    for (const side of [-1, 1]) {
+      c.beginPath(); c.ellipse(side * th * .17, -th * .05, th * .19, th * .09, side * .4, 0, TAU);
+      c.fillStyle = "#2f8a3e"; c.fill(); c.strokeStyle = INK; c.lineWidth = line(u) * .6; c.stroke();
+    }
+    c.fillStyle = "#e8312f";
+    for (const [bx, by] of [[-.05, .02], [.06, .03], [0, -.07]]) { c.beginPath(); c.arc(bx * th, by * th, th * .07, 0, TAU); c.fill(); }
+    c.restore();
+    return;
   }
   // a little leaf growing out of the log
   c.save(); c.translate(len * .12, -th * .5); c.rotate(-.6);
@@ -206,6 +316,7 @@ function hippo(c, u, t, awake) {
       c.beginPath(); c.arc(ex, ey, s * .13, .15 * Math.PI, .85 * Math.PI); c.stroke();
     }
   }
+  if (xmas) santaHat(c, -s * .05, -s * .72, s * .55, .5);
   if (!awake) {
     c.fillStyle = "#fff"; c.strokeStyle = INK; c.lineWidth = Math.max(1.5, s * .05);
     for (const k of [0, .5]) {
@@ -247,7 +358,14 @@ function ramp(c, u, T, used) {
     c.strokeStyle = "#e8412c"; c.lineWidth = u * .06; c.stroke();
   }
   // the lip at the top, and floats at the bottom corners
-  c.beginPath(); c.roundRect(-w * .52, top - u * .06, w * 1.04, u * .1, u * .03); c.fillStyle = "#c4681c"; c.fill(); c.strokeStyle = INK; c.lineWidth = line(u); c.stroke();
+  c.beginPath(); c.roundRect(-w * .52, top - u * .06, w * 1.04, u * .1, u * .03); c.fillStyle = xmas ? "#e8312f" : "#c4681c"; c.fill();
+  if (xmas) {
+    c.save(); c.clip(); c.fillStyle = "#fff";
+    for (let k = -6; k <= 6; k++) { const sx = k * w * .1; c.beginPath(); c.moveTo(sx, top + u * .04); c.lineTo(sx + w * .05, top + u * .04); c.lineTo(sx + w * .1, top - u * .06); c.lineTo(sx + w * .05, top - u * .06); c.closePath(); c.fill(); }
+    c.restore();
+    c.beginPath(); c.roundRect(-w * .52, top - u * .06, w * 1.04, u * .1, u * .03);
+  }
+  c.strokeStyle = INK; c.lineWidth = line(u); c.stroke();
   for (const side of [-1, 1]) {
     c.beginPath(); c.arc(side * w * .47, bot - u * .02, u * .085, 0, TAU); c.fillStyle = "#ff5a4e"; c.fill(); c.stroke();
     c.beginPath(); c.arc(side * w * .47, bot - u * .02, u * .035, 0, TAU); c.fillStyle = "#fff"; c.fill();
@@ -286,6 +404,7 @@ export function drawDuck(c, x, y, u, o = {}) {
   // beak, then the head over its root
   c.beginPath(); c.ellipse(0, -s * .7, s * .17, s * .12, 0, 0, TAU); c.fillStyle = "#ff8a1f"; c.fill(); c.stroke();
   c.beginPath(); c.arc(0, -s * .36, s * .32, 0, TAU); c.fillStyle = Y; c.fill(); c.stroke();
+  if (xmas) duckHat(c, s, line(u));
   // eyes
   for (const side of [-1, 1]) {
     const ex = side * s * .13, ey = -s * .44, r = s * .075;
@@ -302,5 +421,26 @@ export function drawDuck(c, x, y, u, o = {}) {
   }
   c.fillStyle = "rgba(255,120,150,.6)";
   for (const side of [-1, 1]) { c.beginPath(); c.arc(side * s * .24, -s * .3, s * .055, 0, TAU); c.fill(); }
+  c.restore();
+}
+
+// The duck's Santa hat: the same hat as the hippo's, worn at a jaunty angle on the side of its head.
+function duckHat(c, s, lw) {
+  c.save(); c.translate(-s * .22, -s * .56); c.rotate(-.8);
+  santaHat(c, 0, 0, s * .26, .8, lw * .75);
+  c.restore();
+}
+// A Santa hat: a white furry brim, a red cap, and the floppy tip with its bobble flopping off at `flop`
+// (an angle: 0 points straight up the screen, positive leans to the right).
+function santaHat(c, x, y, r, flop, lw = Math.max(1.5, r * .1)) {
+  c.save(); c.translate(x, y);
+  c.lineWidth = lw; c.strokeStyle = INK; c.lineJoin = c.lineCap = "round";
+  const tx = Math.sin(flop) * r * 1.1, ty = -Math.cos(flop) * r * 1.1 - r * .2;
+  c.beginPath(); c.moveTo(-r * .8, 0);
+  c.quadraticCurveTo(-r * .55, -r * .95, tx, ty);
+  c.quadraticCurveTo(r * .55, -r * .45, r * .8, 0);
+  c.closePath(); c.fillStyle = "#e8312f"; c.fill(); c.stroke();
+  c.beginPath(); c.roundRect(-r * .9, -r * .14, r * 1.8, r * .34, r * .17); c.fillStyle = "#fff"; c.fill(); c.stroke();
+  c.beginPath(); c.arc(tx, ty, r * .2, 0, TAU); c.fill(); c.stroke();
   c.restore();
 }

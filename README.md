@@ -19,6 +19,12 @@ Made for little hands:
 - Everything spoken also shows in a caption at the bottom. Every 100 metres gets a ding and a cheer.
 - The buttons for grown-ups are sound on/off and full screen. The best score and the sound setting are remembered in the browser. The screen is kept awake while playing.
 
+## Christmas
+
+From 1 December to 6 January the river goes Christmassy. The banks are snowy, with Christmas trees, presents, snowmen and candy canes. The rocks and logs have snow on them, and the ramps have candy-striped tops. The duck and the hippos wear Santa hats, and snow falls (but not when the device asks for reduced motion). Sleigh bells jingle when a swim starts, at every 100 metres and on the score card, and the duck says "Ho ho ho!". The game plays the same either way.
+
+Add `?christmas=1` to the address to see it on any day, or `?christmas=0` to turn it off.
+
 ## Controls
 
 - **Desktop:** left and right arrow keys (or A and D). Space or up arrow quacks.
@@ -33,7 +39,7 @@ npm install
 npm start          # http://localhost:4173
 ```
 
-Add `?seed=<number>` to the address to send the same rocks, logs, hippos and ramps down the river every time. The browser tests use this.
+Add `?seed=<number>` to the address to send the same rocks, logs, hippos and ramps down the river every time. The browser tests use this, along with `?christmas=0` so they pass in December too.
 
 ## Tests
 
@@ -47,7 +53,8 @@ npm test           # both
 
 - `index.html`: markup and styles
 - `src/river.js`: the rules (where the river sits, how fast it goes, what floats down it, what counts as a bump, the score)
-- `src/draw.js`: canvas drawings of the river and banks, the duck, rocks, logs, hippos and ramps
+- `src/draw.js`: canvas drawings of the river and banks, the duck, rocks, logs, hippos and ramps, and their Christmas versions
+- `src/season.js`: when the Christmas theme is on
 - `src/game.js`: everything else, including steering, jumps, bumps, sound, voice, the score card and the buttons
 
 ## Deploying
