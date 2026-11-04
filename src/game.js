@@ -28,7 +28,7 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify({ best, muted, 
 const seed = Number(new URLSearchParams(location.search).get("seed"));
 const rnd = Number.isInteger(seed) && seed > 0 ? seeded(seed) : Math.random;
 
-// December to Twelfth Night, or with the Christmas switch or ?christmas=1, the river goes
+// 12 November to Twelfth Night, or with the Christmas switch or ?christmas=1, the river goes
 // Christmassy (see season.js).
 let xmas;
 function setXmas(on) {

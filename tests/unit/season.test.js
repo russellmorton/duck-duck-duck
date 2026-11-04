@@ -4,9 +4,9 @@ import { christmas } from "../../src/season.js";
 
 const day = (m, d) => new Date(2026, m - 1, d, 12);
 
-test("Christmas comes by itself from 1 December to 6 January", () => {
-  for (const [m, d] of [[12, 1], [12, 24], [12, 25], [12, 31], [1, 1], [1, 6]]) assert.equal(christmas(day(m, d)), true, `${d}/${m}`);
-  for (const [m, d] of [[11, 30], [1, 7], [2, 1], [7, 4], [11, 4]]) assert.equal(christmas(day(m, d)), false, `${d}/${m}`);
+test("Christmas comes by itself from 12 November (the day after Remembrance Day) to 6 January", () => {
+  for (const [m, d] of [[11, 12], [11, 30], [12, 1], [12, 24], [12, 25], [12, 31], [1, 1], [1, 6]]) assert.equal(christmas(day(m, d)), true, `${d}/${m}`);
+  for (const [m, d] of [[11, 11], [11, 4], [1, 7], [2, 1], [7, 4], [10, 31]]) assert.equal(christmas(day(m, d)), false, `${d}/${m}`);
 });
 
 test("?christmas=1 turns it on any day, and ?christmas=0 turns it off", () => {

@@ -21,7 +21,7 @@ Made for little hands:
 
 ## Christmas
 
-From 1 December to 6 January the river goes Christmassy. The banks are snowy, with Christmas trees, presents, snowmen and candy canes. The rocks and logs have snow on them, and the ramps have candy-striped tops. The duck and the hippos wear Santa hats, and snow falls (but not when the device asks for reduced motion). Sleigh bells jingle when a swim starts, at every 100 metres and on the score card, and the duck says "Ho ho ho!". The game plays the same either way.
+From 12 November (the day after Remembrance Day) to 6 January the river goes Christmassy. The banks are snowy, with Christmas trees, presents, snowmen and candy canes. The rocks and logs have snow on them, and the ramps have candy-striped tops. The duck and the hippos wear Santa hats, and snow falls (but not when the device asks for reduced motion). Sleigh bells jingle when a swim starts, at every 100 metres and on the score card, and the duck says "Ho ho ho!". The game plays the same either way.
 
 Grown-ups can turn it on or off on any day with the **Christmas** switch on the title screen, which is remembered. `?christmas=1` or `?christmas=0` in the address overrides both.
 
@@ -39,7 +39,7 @@ npm install
 npm start          # http://localhost:4173
 ```
 
-Add `?seed=<number>` to the address to send the same rocks, logs, hippos and ramps down the river every time. The browser tests use this, along with `?christmas=0` so they pass in December too.
+Add `?seed=<number>` to the address to send the same rocks, logs, hippos and ramps down the river every time. The browser tests use this, along with `?christmas=0` so they pass at Christmas too.
 
 ## Tests
 

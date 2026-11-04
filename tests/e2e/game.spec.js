@@ -12,7 +12,7 @@ const state = page => page.evaluate(() => document.body.dataset.state);
 const duckX = page => page.locator("#river").evaluate(el => Number(el.dataset.duck));
 const num = async loc => Number((await loc.textContent()).match(/\d+/)[0]);
 
-// christmas=0 keeps the plain river even in December, so these tests pass all year round.
+// christmas=0 keeps the plain river even at Christmas, so these tests pass all year round.
 // The seed makes the same things float down the river every time.
 async function play(page, seed = 1, theme = "christmas=0") {
   await page.goto(`/?seed=${seed}&${theme}`);
