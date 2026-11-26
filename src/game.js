@@ -504,6 +504,7 @@ function start() {
   cv.focus({ preventScroll: true });
   go();
 }
+$("toybox").addEventListener("click", e => e.stopPropagation());   // follow the link, don't start
 $("title-screen").addEventListener("click", start);
 
 $("again").addEventListener("click", () => {
